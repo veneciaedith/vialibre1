@@ -1,13 +1,875 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VíaLibre — Sistema operativo del comercio</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a2b4a'/><text y='.9em' font-size='80' x='10'>V</text></svg>" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VíaLibre — Sistema operativo del comercio</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a2b4a;--navy2:#0f1d35;
+  --olive:#8b9460;--olive2:#6f7649;--olive3:#d3d9b8;
+  --bg:#f4f6f8;--card:#fff;
+  --ink:#1a2b4a;--muted:#6b7280;
+  --green:#4caf50;--green2:#e8f5e9;
+  --yellow:#f0c040;--red:#e74c3c;--red2:#fdecea;
+  --border:#e5e7eb;--border2:#f0f2f5;
+  --r:14px;--r2:10px;
+}
+html,body,#root{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink)}
+button{font-family:inherit;cursor:pointer}
+
+/* TOPBAR */
+.topbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:50;padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:38px;height:38px;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:800;font-size:18px;border-radius:10px}
+.brand-name{font-weight:800;font-size:20px}
+.brand-name span{color:var(--olive3)}
+.shop-dot{width:8px;height:8px;border-radius:50%;background:#7cd17c;box-shadow:0 0 8px #7cd17c;display:inline-block;margin-right:8px}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 62px)}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:16px 0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;display:flex;flex-direction:column}
+.nav-sec-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:0 20px 6px;margin-top:16px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.nav-btn{display:flex;align-items:center;gap:12px;padding:11px 16px;margin:2px 10px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);background:none;border:none;width:calc(100% - 20px);text-align:left;transition:all .15s;cursor:pointer}
+.nav-btn:hover{background:var(--bg);color:var(--ink)}
+.nav-btn.active{background:var(--navy);color:#fff;font-weight:600}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.nav-foot{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);line-height:1.7}
+.main{padding:32px 36px 60px;max-width:1300px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:22px;position:relative;box-shadow:0 1px 3px rgba(15,29,53,.05)}
+.card-title{font-weight:700;font-size:18px;margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.tag{display:inline-flex;align-items:center;background:var(--bg);color:var(--muted);font-size:10px;letter-spacing:.1em;padding:4px 10px;border-radius:6px;margin-bottom:12px;font-weight:600;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.tag.navy{background:var(--navy);color:#fff}
+.tag.olive{background:var(--olive);color:#fff}
+
+/* PAGE HEAD */
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;flex-wrap:wrap;gap:16px}
+.page-title{font-weight:800;font-size:38px;letter-spacing:-.03em;line-height:1.05}
+.page-title em{font-style:normal;color:var(--olive);font-weight:700}
+.page-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-align:right;letter-spacing:.1em}
+.page-meta .now{color:var(--navy);font-weight:700}
+
+/* KPIs */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:18px 20px}
+.kpi-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px}
+.kpi-val{font-weight:800;font-size:26px;letter-spacing:-.02em}
+.kpi-delta{margin-top:8px;font-size:12px;font-weight:600}
+.kpi-delta.up{color:var(--green)}
+.kpi-delta.dn{color:var(--red)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+
+/* SEMAFORO ITEM */
+.sem-item{display:grid;grid-template-columns:14px 1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border2)}
+.sem-item:last-child{border:none}
+.dot{width:12px;height:12px;border-radius:50%}
+.dot.r{background:var(--red);box-shadow:0 0 0 3px rgba(231,76,60,.15)}
+.dot.y{background:var(--yellow);box-shadow:0 0 0 3px rgba(240,192,64,.15)}
+.dot.g{background:var(--green);box-shadow:0 0 0 3px rgba(76,175,80,.15)}
+.pname{font-weight:600;font-size:14px}
+.pmeta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.mbar{width:80px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;position:relative}
+.mbar-fill{position:absolute;left:0;top:0;height:100%;border-radius:3px}
+.mpct{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;min-width:46px;text-align:right}
+
+/* SCANNER CARD */
+.scanner-card{background:var(--navy);color:#fff;border:none;border-radius:var(--r);overflow:hidden;padding:24px;position:relative}
+.scanner-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(139,148,96,.2) 0%,transparent 50%);pointer-events:none}
+.scan-eye{width:64px;height:64px;border:2px solid var(--olive3);border-radius:14px;display:grid;place-items:center;margin-bottom:14px;position:relative;font-size:28px}
+.scan-line{position:absolute;left:6px;right:6px;height:2px;background:var(--olive3);animation:scan 2.5s ease-in-out infinite;border-radius:2px}
+@keyframes scan{0%,100%{top:6px}50%{top:calc(100% - 8px)}}
+.scan-title{font-weight:700;font-size:20px;margin-bottom:8px}
+.scan-desc{font-size:13px;opacity:.8;margin-bottom:18px;line-height:1.5}
+.btn-scan{background:var(--olive);color:#fff;border:none;padding:11px 20px;font-weight:700;font-size:14px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:background .15s}
+.btn-scan:hover{background:var(--olive2)}
+
+/* VOICE CARD */
+.voice-card{position:relative;overflow:hidden}
+.mic-btn{width:70px;height:70px;border-radius:50%;background:var(--navy);color:#fff;border:none;display:grid;place-items:center;cursor:pointer;font-size:28px;transition:all .2s;box-shadow:0 6px 20px -4px rgba(26,43,74,.4);margin:0 auto 14px}
+.mic-btn:hover{transform:scale(1.06)}
+.mic-btn.rec{background:var(--red);animation:pulse 1.4s infinite}
+.mic-btn.rec::before,.mic-btn.rec::after{content:"";position:absolute;border-radius:50%;border:2px solid var(--red);animation:ripple 1.4s infinite;left:50%;top:0;transform:translateX(-50%);width:70px;height:70px}
+.mic-btn.rec::after{animation-delay:.7s}
+@keyframes pulse{50%{transform:scale(1.06)}}
+@keyframes ripple{0%{opacity:.6;transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) scale(1.6)}}
+.wave{display:flex;align-items:center;justify-content:center;gap:3px;height:40px;margin:10px 0}
+.wbar{width:3px;background:var(--olive);border-radius:3px}
+.wbar.anim{animation:wave 1s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.transcript{background:var(--bg);border-radius:10px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:12px;min-height:56px;color:var(--ink);line-height:1.6}
+
+/* CHAT */
+.chat-card{background:#e7e3db;border:none;padding:0;overflow:hidden}
+.chat-head{background:#075e54;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.chat-avatar{width:36px;height:36px;background:#fff;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#075e54}
+.chat-body{padding:16px;display:flex;flex-direction:column;gap:10px;max-height:360px;overflow-y:auto}
+.msg{background:#fff;padding:10px 13px;border-radius:14px 14px 14px 4px;font-size:13px;line-height:1.55;max-width:90%;box-shadow:0 1px 1px rgba(0,0,0,.06);white-space:pre-line}
+.msg.me{background:#d9fdd3;border-radius:14px 14px 4px 14px;align-self:flex-end;margin-left:auto}
+.msg-time{font-size:10px;color:var(--muted);margin-top:4px;display:block;text-align:right}
+.chat-actions{display:flex;flex-direction:column;gap:6px;align-self:flex-start;width:90%}
+.chat-action-btn{background:#fff;border:none;padding:10px 14px;border-radius:10px;font-weight:600;font-size:13px;color:var(--navy);text-align:center;cursor:pointer;transition:background .15s}
+.chat-action-btn:hover{background:var(--bg)}
+.chat-action-btn.danger{color:var(--red)}
+.chat-input{display:flex;gap:8px;padding:10px;background:#f0f2f5;align-items:center}
+.chat-input input{flex:1;background:#fff;border:none;padding:10px 14px;border-radius:20px;font-size:13px;font-family:inherit;outline:none}
+.chat-input button{background:#075e54;color:#fff;border:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:18px}
+
+/* BTNS */
+.btn{background:var(--navy);color:#fff;border:none;padding:12px 20px;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--navy2)}
+.btn.olive{background:var(--olive)}
+.btn.olive:hover{background:var(--olive2)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--border)}
+.btn.ghost:hover{background:var(--bg)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(15,29,53,.6);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(6px);padding:20px}
+.modal-box{background:#fff;width:540px;max-width:100%;max-height:90vh;overflow:auto;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{background:var(--navy);color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-radius:20px 20px 0 0}
+.modal-head h3{font-weight:700;font-size:17px}
+.modal-close{background:rgba(255,255,255,.1);border:none;color:#fff;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px}
+.modal-body{padding:22px}
+.scan-preview-box{background:var(--navy);height:220px;border-radius:12px;display:grid;place-items:center;color:#fff;margin-bottom:18px;position:relative;overflow:hidden}
+.scan-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(139,148,96,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(139,148,96,.18) 1px,transparent 1px);background-size:22px 22px}
+.scan-beam{position:absolute;left:16px;right:16px;height:3px;background:var(--olive3);box-shadow:0 0 18px var(--olive3);border-radius:3px;animation:scan 1.8s ease-in-out infinite}
+.scan-center{position:relative;z-index:1;text-align:center}
+.blink{animation:blink 1s infinite;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--olive3);letter-spacing:.18em;font-weight:700}
+@keyframes blink{50%{opacity:0}}
+.scan-line-item{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);font-size:13px}
+.scan-line-item:last-child{border:none}
+.scan-qty{font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.scan-price{font-family:'JetBrains Mono',monospace;font-weight:700}
+.scan-total{display:flex;justify-content:space-between;padding:12px 0 0;margin-top:6px;border-top:2px solid var(--navy);font-size:18px;font-weight:800}
+
+/* WEB3 */
+.collateral-card{background:var(--navy);color:#fff;border:none;border-radius:var(--r);padding:26px;position:relative;overflow:hidden}
+.collateral-card::before{content:"";position:absolute;top:-30%;right:-15%;width:280px;height:280px;background:radial-gradient(circle,rgba(139,148,96,.22) 0%,transparent 60%);pointer-events:none}
+.col-inner{position:relative;z-index:1}
+.col-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--olive3);text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.col-val{font-weight:800;font-size:46px;line-height:1;letter-spacing:-.03em;margin-bottom:6px}
+.col-unit{font-size:16px;font-weight:500;opacity:.6;margin-left:6px}
+.col-desc{font-size:13px;opacity:.75;line-height:1.55;margin-bottom:20px}
+.col-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.col-stat{background:rgba(255,255,255,.08);padding:12px;border-radius:10px}
+.col-stat .l{font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+.col-stat .v{font-weight:700;font-size:18px}
+.col-bars{display:flex;gap:5px;align-items:flex-end;height:70px;margin-bottom:16px}
+.col-bar{flex:1;border-radius:3px 3px 0 0;opacity:.85}
+
+/* INV TABLE */
+.inv-table{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-top:18px}
+.inv-head{display:grid;grid-template-columns:50px 2fr 1fr 1fr 1fr 1.2fr 70px;gap:12px;padding:12px 18px;background:var(--bg);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;font-family:'JetBrains Mono',monospace}
+.inv-row{display:grid;grid-template-columns:50px 2fr 1fr 1fr 1fr 1.2fr 70px;gap:12px;padding:13px 18px;border-top:1px solid var(--border2);align-items:center;font-size:13px;cursor:pointer;transition:background .15s}
+.inv-row:hover{background:var(--bg)}
+.inv-code{width:40px;height:40px;background:var(--bg);border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:13px;color:var(--navy)}
+.sbar-wrap{display:flex;align-items:center;gap:6px}
+.sbar{height:6px;flex:1;background:var(--bg);border-radius:3px;overflow:hidden;min-width:36px}
+.sbar-fill{height:100%;border-radius:3px}
+
+/* SEARCH */
+.search-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.search-in{flex:1;min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:13px;font-family:inherit;outline:none}
+.search-in:focus{border-color:var(--navy)}
+.chip{padding:7px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--muted)}
+.chip:hover{background:var(--bg);color:var(--ink)}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* SCORE RING */
+.score-ring-wrap{display:grid;place-items:center;padding:18px;background:var(--bg);border-radius:12px}
+.score-ring{width:180px;height:180px;position:relative}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:44px;letter-spacing:-.03em}
+.score-num small{font-size:13px;color:var(--muted);font-weight:500}
+
+/* COMMUNITY */
+.comm-row{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--border2)}
+.comm-row:last-child{border:none}
+.comm-graph{flex:2;height:32px;background:var(--bg);border-radius:6px;position:relative;margin:0 14px}
+.comm-line{position:absolute;top:0;bottom:0;width:3px;border-radius:2px}
+.comm-you-lbl{position:absolute;top:-18px;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:700;transform:translateX(-50%);white-space:nowrap}
+.comm-avg-lbl{position:absolute;bottom:-18px;font-size:10px;font-family:'JetBrains Mono',monospace;transform:translateX(-50%);white-space:nowrap;color:var(--muted)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:200;transition:all .3s;pointer-events:none}
+.toast-box{background:var(--navy);color:#fff;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:500;border-left:3px solid var(--green);box-shadow:0 12px 30px rgba(0,0,0,.25);white-space:nowrap}
+
+/* TICKER */
+.ticker{background:var(--navy2);color:#fff;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;padding:9px 0;overflow:hidden;white-space:nowrap}
+.ticker-track{display:inline-block;animation:ticker 40s linear infinite}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker span{margin:0 26px;color:var(--olive3)}
+.ticker em{font-style:normal;opacity:.55}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fade{animation:fadeUp .35s ease}
+
+/* RULES */
+.rule-item{display:flex;align-items:center;gap:12px;padding:13px;background:var(--card);border:1px solid var(--border2);border-radius:10px;margin-bottom:8px}
+.sw{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.sw::after{content:"";position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.on{background:var(--olive)}
+.sw.on::after{transform:translateX(16px)}
+
+/* ESCROW */
+.esc-step{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 0;position:relative}
+.esc-dot{width:28px;height:28px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:grid;place-items:center;font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.esc-step.done .esc-dot{background:var(--green);color:#fff;border-color:var(--green)}
+.esc-step.act .esc-dot{background:var(--olive);color:#fff;border-color:var(--olive);animation:pulse 1.5s infinite}
+.esc-step:not(:last-child)::after{content:"";position:absolute;left:13px;top:40px;width:2px;height:16px;background:var(--border)}
+.esc-step.done:not(:last-child)::after{background:var(--green)}
+.esc-l{font-weight:600;font-size:14px}
+.esc-s{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.esc-amt{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:var(--navy)}
+
+@media(max-width:1000px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:relative;top:0;height:auto;flex-direction:row;overflow-x:auto;padding:8px;border-right:none;border-bottom:1px solid var(--border)}
+  .nav-sec-label,.nav-foot{display:none}
+  .nav-btn{width:auto;white-space:nowrap;margin:0 4px;padding:8px 12px}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .g2,.g3{grid-template-columns:1fr}
+  .main{padding:20px 16px 50px}
+  .inv-head,.inv-row{grid-template-columns:40px 2fr 1fr 70px}
+  .inv-head .h3,.inv-head .h4,.inv-head .h5,.inv-row .c3,.inv-row .c4,.inv-row .c5{display:none}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef, useMemo } = React;
+
+// ============ DATA ============
+const INVENTORY = [
+  {id:'ccola',code:'CC',name:'Coca-Cola 2.25L',cat:'Bebidas',cost:1380,pvp:1900,stock:42,opt:50,st:'g',margin:38},
+  {id:'aceite',code:'AC',name:'Aceite Cocinero 900ml',cat:'Almacén',cost:1880,pvp:1920,stock:6,opt:24,st:'r',margin:2.1,alert:'COSTO ↑18%'},
+  {id:'yerba',code:'YR',name:'Yerba Rosamonte 1kg',cat:'Almacén',cost:2450,pvp:2800,stock:14,opt:25,st:'y',margin:14,alert:'FLETE ALTO'},
+  {id:'pan',code:'PL',name:'Pan Lactal Bimbo',cat:'Panadería',cost:680,pvp:890,stock:10,opt:28,st:'y',margin:31,alert:'STOCK BAJO'},
+  {id:'harina',code:'HP',name:'Harina Pureza 1kg',cat:'Almacén',cost:980,pvp:1030,stock:28,opt:30,st:'r',margin:4.8,alert:'AJUSTAR PVP'},
+  {id:'detergente',code:'DM',name:'Detergente Magistral',cat:'Limpieza',cost:1250,pvp:1230,stock:18,opt:20,st:'r',margin:-1.4,alert:'PERDIDA $20/u'},
+  {id:'arroz',code:'AG',name:'Arroz Gallo Doble 1kg',cat:'Almacén',cost:890,pvp:1250,stock:3,opt:20,st:'g',margin:40,alert:'STOCK CRITICO'},
+  {id:'fideos',code:'FM',name:'Fideos Matarazzo',cat:'Almacén',cost:540,pvp:640,stock:22,opt:30,st:'y',margin:16},
+  {id:'atun',code:'AT',name:'Atún Gomes da Costa',cat:'Conservas',cost:1100,pvp:1480,stock:12,opt:20,st:'g',margin:34},
+  {id:'cafe',code:'CB',name:'Café Bonafide 250g',cat:'Almacén',cost:2200,pvp:3100,stock:4,opt:15,st:'r',margin:40,alert:'STOCK CRITICO'},
+  {id:'leche',code:'LV',name:'Leche La Serenísima',cat:'Lácteos',cost:720,pvp:980,stock:24,opt:30,st:'g',margin:36},
+  {id:'serv',code:'SE',name:'Servilletas Elite',cat:'Hogar',cost:380,pvp:520,stock:5,opt:18,st:'y',margin:36},
+];
+
+const COMM_DATA = [
+  {name:'Aceite Cocinero 900ml',yours:1880,avg:1720,diff:-160},
+  {name:'Yerba Rosamonte 1kg',yours:2450,avg:2380,diff:-70},
+  {name:'Harina Pureza 1kg',yours:980,avg:1080,diff:100},
+  {name:'Coca-Cola 2.25L',yours:1380,avg:1420,diff:40},
+  {name:'Detergente Magistral',yours:1250,avg:1120,diff:-130},
+];
+
+const TX_DATA = [
+  {type:'Pago a Bimbo',hash:'0x84f…2c9b',date:'HOY',amt:-24180,unit:'USDC'},
+  {type:'Recompensa Data-to-Earn',hash:'0x91a…8d33',date:'AYER',amt:142,unit:'VLA'},
+  {type:'Update colateral',hash:'0x6c2…1ef7',date:'AYER',amt:280,unit:'USDC'},
+  {type:'Pago a Coca FEMSA',hash:'0x3e8…7a01',date:'25/05',amt:-18940,unit:'USDC'},
+];
+
+// ============ UTILS ============
+const SC = {r:'var(--red)',y:'var(--yellow)',g:'var(--green)'};
+
+function Toast({msg}){
+  return msg ? (
+    <div className="toast-wrap">
+      <div className="toast-box">{msg}</div>
+    </div>
+  ) : null;
+}
+
+function Dot({st}){return <span className={`dot ${st}`}/>}
+
+function SemItem({p,color}){
+  const w = Math.min(Math.max(p.margin*2.3,5),100);
+  const c = SC[p.st];
+  return (
+    <div className="sem-item">
+      <Dot st={p.st}/>
+      <div>
+        <div className="pname">{p.name}</div>
+        <div className="pmeta">{p.alert||'ESTABLE'}</div>
+      </div>
+      <div className="mbar"><div className="mbar-fill" style={{width:`${w}%`,background:c}}/></div>
+      <div className="mpct" style={{color:c}}>{p.margin>0?'+':''}{p.margin}%</div>
+    </div>
+  );
+}
+
+// ============ SCANNER MODAL ============
+function ScannerModal({onClose,onConfirm}){
+  const [phase,setPhase]=useState('scan');
+  const lines=[
+    {name:'Coca-Cola 2.25L',qty:24,total:33120},
+    {name:'Aceite Cocinero 900ml',qty:12,total:22560},
+    {name:'Yerba Rosamonte 1kg',qty:8,total:19600},
+    {name:'Harina Pureza 1kg',qty:20,total:19600},
+    {name:'Fideos Matarazzo',qty:15,total:8100},
+  ];
+  useEffect(()=>{const t=setTimeout(()=>setPhase('done'),2200);return()=>clearTimeout(t)},[]);
+  const total=lines.reduce((s,l)=>s+l.total,0);
+  return(
+    <div className="modal-bg" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-box">
+        <div className="modal-head">
+          <h3>Escáner de Factura</h3>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          {phase==='scan'?(
+            <div className="scan-preview-box">
+              <div className="scan-grid"/>
+              <div className="scan-beam"/>
+              <div className="scan-center">
+                <div style={{fontSize:44,marginBottom:8}}>📄</div>
+                <div style={{fontWeight:700,fontSize:17,marginBottom:8}}>Procesando factura...</div>
+                <div className="blink">DETECTANDO PRODUCTOS</div>
+              </div>
+            </div>
+          ):(
+            <div className="fade">
+              <h4 style={{color:'var(--green)',fontWeight:700,marginBottom:6}}>✓ Factura procesada · Dist. Rosario S.A.</h4>
+              <div style={{fontFamily:'JetBrains Mono,monospace',fontSize:11,color:'var(--muted)',marginBottom:14}}>N° 0001-00284921 · HOY · {lines.length} PRODUCTOS</div>
+              {lines.map((l,i)=>(
+                <div key={i} className="scan-line-item">
+                  <div><strong>{l.name}</strong></div>
+                  <div className="scan-qty">×{l.qty}</div>
+                  <div className="scan-price">${l.total.toLocaleString('es-AR')}</div>
+                </div>
+              ))}
+              <div className="scan-total"><span>TOTAL</span><span>${total.toLocaleString('es-AR')}</span></div>
+              <div style={{display:'flex',gap:10,marginTop:16}}>
+                <button className="btn" style={{flex:1}} onClick={()=>onConfirm(lines)}>Cargar al inventario</button>
+                <button className="btn ghost" onClick={onClose}>Revisar manual</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============ PAGES ============
+function Dashboard({inv,setInv,showToast,openScanner}){
+  const avgMargin=(inv.reduce((s,p)=>s+p.margin,0)/inv.length).toFixed(1);
+  const gaugeAngle=Math.min(100,Math.max(0,(avgMargin/40)*100));
+  const topProds=[...inv.filter(p=>p.st==='r').slice(0,1),...inv.filter(p=>p.st==='y').slice(0,1),...inv.filter(p=>p.st==='g').sort((a,b)=>b.margin-a.margin).slice(0,2)];
+  const [msgs,setMsgs]=useState([
+    {from:'bot',text:'¡Hola! Hoy es viernes, alta venta de pan. Solo te quedan 10 unidades. ¿Pido al Proveedor Molinos (20 unidades)?',time:'8:00 AM'},
+  ]);
+  const [inp,setInp]=useState('');
+  const sendMsg=()=>{
+    if(!inp.trim())return;
+    const newMsgs=[...msgs,{from:'me',text:inp,time:'ahora'}];
+    setMsgs(newMsgs);setInp('');
+    setTimeout(()=>setMsgs(m=>[...m,{from:'bot',text:'Entendido. Pedido generado y en escrow USDC. Te aviso cuando llegue.',time:'ahora'}]),800);
+  };
+  return(
+    <div className="fade">
+      <div className="page-head">
+        <div><h1 className="page-title">Tu negocio <em>al día.</em></h1><div style={{fontSize:14,color:'var(--muted)',marginTop:6}}>Casilda · Viernes 29 de Mayo, 2026</div></div>
+        <div className="page-meta"><div className="now">VIE 29/05/2026</div><div>13:47 · CASILDA</div></div>
+      </div>
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-label">Ventas hoy</div><div className="kpi-val">$84.320</div><div className="kpi-delta up">▲ 12,4% vs ayer</div></div>
+        <div className="kpi"><div className="kpi-label">Margen promedio</div><div className="kpi-val">{avgMargin}%</div><div className="kpi-delta dn">▼ 1,8 pts</div></div>
+        <div className="kpi"><div className="kpi-label">SKU activos</div><div className="kpi-val">{inv.length}</div><div className="kpi-delta up">▲ 7 nuevos</div></div>
+        <div className="kpi"><div className="kpi-label">Colateral on-chain</div><div className="kpi-val">$3.420<span style={{fontSize:13,color:'var(--muted)'}}> USD</span></div><div className="kpi-delta up">▲ verificado</div></div>
+      </div>
+      <div className="g2">
+        <div className="scanner-card">
+          <div className="scan-eye">📄<div className="scan-line"/></div>
+          <div className="scan-title">Sacá una foto. Cargamos todo.</div>
+          <div className="scan-desc">Foto de factura → IA detecta productos, cantidades y costos → stock actualizado solo.</div>
+          <button className="btn-scan" onClick={openScanner}>📷 Escanear factura</button>
+          <div style={{display:'flex',gap:8,marginTop:12,fontSize:12,flexWrap:'wrap'}}>
+            <span onClick={openScanner} style={{padding:'6px 12px',border:'1px solid rgba(255,255,255,.2)',borderRadius:8,cursor:'pointer',opacity:.8}}>📎 Subir imagen</span>
+            <span onClick={openScanner} style={{padding:'6px 12px',border:'1px solid rgba(255,255,255,.2)',borderRadius:8,cursor:'pointer',opacity:.8}}>💬 WhatsApp</span>
+          </div>
+        </div>
+        <div className="card">
+          <div className="tag olive">SEMÁFORO</div>
+          <div className="card-title">Alertas activas</div>
+          {topProds.map(p=><SemItem key={p.id} p={p}/>)}
+        </div>
+      </div>
+      <div className="g2">
+        <div className="card voice-card">
+          <div className="tag" style={{background:'var(--red)',color:'#fff'}}>VOZ</div>
+          <div className="card-title" style={{marginBottom:12}}>Andá por las góndolas hablando.</div>
+          <div className="mic-btn" onClick={()=>showToast('🎤 Grabando... "Me quedan 5 latas de atún..." → ✓ Inventario actualizado')}>🎤</div>
+          <p style={{fontSize:13,color:'var(--muted)',textAlign:'center',marginBottom:12}}>Tocá para grabar</p>
+          <div className="wave">{Array.from({length:9}).map((_,i)=><div key={i} className="wbar" style={{height:`${[20,40,80,60,100,60,80,40,20][i]}%`}}/>)}</div>
+          <div className="transcript" style={{color:'var(--muted)'}}>Esperando voz...</div>
+        </div>
+        <div className="chat-card card">
+          <div className="chat-head">
+            <div className="chat-avatar">VL</div>
+            <div><div style={{fontWeight:600,fontSize:14}}>Asistente VíaLibre</div><div style={{fontSize:11,color:'rgba(255,255,255,.7)'}}>● en línea</div></div>
+          </div>
+          <div className="chat-body">
+            {msgs.map((m,i)=>(
+              <div key={i} className={`msg${m.from==='me'?' me':''}`}>
+                {m.text}<span className="msg-time">{m.time}</span>
+              </div>
+            ))}
+            {msgs[msgs.length-1]?.from==='bot'&&(
+              <div className="chat-actions">
+                <button className="chat-action-btn" style={{background:'var(--navy)',color:'#fff'}} onClick={()=>{setMsgs(m=>[...m,{from:'me',text:'SÍ, PEDIR Y PAGAR',time:'ahora'}]);setTimeout(()=>setMsgs(m=>[...m,{from:'bot',text:'✓ Pedido de 20 uni. Pan Molinos realizado. Pago $18.000 USDC programado (Smart Contract Escrow).',time:'ahora'}]),800)}}>SÍ, PEDIR Y PAGAR</button>
+                <button className="chat-action-btn danger" onClick={()=>showToast('Pedido cancelado.')}>CANCELAR</button>
+                <button className="chat-action-btn" onClick={()=>showToast('Ingresá la cantidad deseada.')}>CAMBIAR CANTIDAD</button>
+              </div>
+            )}
+          </div>
+          <div className="chat-input">
+            <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&sendMsg()} placeholder="Escribí un mensaje..."/>
+            <button onClick={sendMsg}>➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Inventario({inv,setInv,showToast}){
+  const [q,setQ]=useState('');
+  const [cat,setCat]=useState('Todos');
+  const cats=['Todos','Almacén','Bebidas','Lácteos','Limpieza','Panadería','Conservas','Hogar'];
+  const filtered=inv.filter(p=>{
+    const ms=p.name.toLowerCase().includes(q.toLowerCase())||p.cat.toLowerCase().includes(q.toLowerCase());
+    const mc=cat==='Todos'||p.cat===cat;
+    return ms&&mc;
+  });
+  const red=inv.filter(p=>p.st==='r').length;
+  const yel=inv.filter(p=>p.st==='y').length;
+  const grn=inv.filter(p=>p.st==='g').length;
+  return(
+    <div className="fade">
+      <div className="page-head">
+        <div><h1 className="page-title">Inventario <em>vivo.</em></h1></div>
+        <div className="page-meta"><div className="now">{inv.length} SKU · 13:42</div><div>SINCRONIZADO</div></div>
+      </div>
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-label">En rojo</div><div className="kpi-val" style={{color:'var(--red)'}}>{red}</div><div className="kpi-delta dn">Acción urgente</div></div>
+        <div className="kpi"><div className="kpi-label">En amarillo</div><div className="kpi-val" style={{color:'var(--yellow)'}}>{yel}</div><div className="kpi-delta">Revisar costos</div></div>
+        <div className="kpi"><div className="kpi-label">En verde</div><div className="kpi-val" style={{color:'var(--green)'}}>{grn}</div><div className="kpi-delta up">OK</div></div>
+        <div className="kpi"><div className="kpi-label">Valor total</div><div className="kpi-val">$3.4M</div><div className="kpi-delta up">▲ on-chain</div></div>
+      </div>
+      <div className="search-row">
+        <input className="search-in" placeholder="Buscar producto..." value={q} onChange={e=>setQ(e.target.value)}/>
+        {cats.map(c=><button key={c} className={`chip${cat===c?' on':''}`} onClick={()=>setCat(c)}>{c}</button>)}
+      </div>
+      <div className="inv-table">
+        <div className="inv-head"><div></div><div>Producto</div><div className="h3">Categoría</div><div className="h4">Costo</div><div className="h5">PVP</div><div>Stock</div><div>Margen</div></div>
+        {filtered.map(p=>{
+          const sp=Math.min(100,p.stock/p.opt*100);
+          const sc=sp<30?'var(--red)':sp<60?'var(--yellow)':'var(--green)';
+          return(
+            <div key={p.id} className="inv-row" onClick={()=>showToast(`${p.name} · Margen ${p.margin>0?'+':''}${p.margin}% · Stock ${p.stock}/${p.opt}`)}>
+              <div className="inv-code">{p.code}</div>
+              <div><div style={{fontWeight:600}}>{p.name}</div><div style={{fontSize:11,color:'var(--muted)',fontFamily:'JetBrains Mono,monospace'}}>{p.cat}</div></div>
+              <div className="c3" style={{color:'var(--muted)',fontSize:12}}>{p.cat}</div>
+              <div className="c4" style={{fontFamily:'JetBrains Mono,monospace',fontSize:12}}>${p.cost.toLocaleString('es-AR')}</div>
+              <div className="c5" style={{fontFamily:'JetBrains Mono,monospace',fontSize:12}}>${p.pvp.toLocaleString('es-AR')}</div>
+              <div className="sbar-wrap"><div className="sbar"><div className="sbar-fill" style={{width:`${sp}%`,background:sc}}/></div><span style={{fontSize:11,fontFamily:'JetBrains Mono,monospace'}}>{p.stock}</span></div>
+              <div style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:12,color:SC[p.st]}}>{p.margin>0?'+':''}{p.margin}%</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Semaforo({inv,showToast}){
+  const red=inv.filter(p=>p.st==='r');
+  const yel=inv.filter(p=>p.st==='y');
+  const grn=inv.filter(p=>p.st==='g');
+  return(
+    <div className="fade">
+      <div className="page-head"><div><h1 className="page-title">Semáforo de <em>ganancia.</em></h1></div><div className="page-meta"><div className="now">ACTUALIZADO · 4 MIN</div><div>{inv.length} SKU</div></div></div>
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-label">En rojo</div><div className="kpi-val" style={{color:'var(--red)'}}>{red.length}</div><div className="kpi-delta dn">Acción inmediata</div></div>
+        <div className="kpi"><div className="kpi-label">En amarillo</div><div className="kpi-val" style={{color:'var(--yellow)'}}>{yel.length}</div><div className="kpi-delta">Revisar</div></div>
+        <div className="kpi"><div className="kpi-label">En verde</div><div className="kpi-val" style={{color:'var(--green)'}}>{grn.length}</div><div className="kpi-delta up">OK</div></div>
+        <div className="kpi"><div className="kpi-label">Ganancia salvada</div><div className="kpi-val">$28.4K</div><div className="kpi-delta up">Este mes</div></div>
+      </div>
+      <div className="g2">
+        <div className="card" style={{borderLeft:'4px solid var(--red)'}}>
+          <div className="card-title" style={{color:'var(--red)'}}>🔴 Acción inmediata</div>
+          <div className="card-sub">{red.length} productos perdiendo dinero</div>
+          {red.map(p=><SemItem key={p.id} p={p}/>)}
+          <button className="btn" style={{width:'100%',marginTop:14}} onClick={()=>showToast('Alertas enviadas al proveedor.')}>Enviar alertas al proveedor</button>
+        </div>
+        <div>
+          <div className="card" style={{borderLeft:'4px solid var(--yellow)',marginBottom:16}}>
+            <div className="card-title" style={{color:'var(--yellow)'}}>🟡 Atención</div>
+            <div className="card-sub">{yel.length} con margen bajo</div>
+            {yel.slice(0,2).map(p=><SemItem key={p.id} p={p}/>)}
+          </div>
+          <div className="card" style={{borderLeft:'4px solid var(--green)'}}>
+            <div className="card-title" style={{color:'var(--green)'}}>🟢 Estrellas</div>
+            <div className="card-sub">Pedí más de estos</div>
+            {grn.sort((a,b)=>b.margin-a.margin).slice(0,2).map(p=><SemItem key={p.id} p={p}/>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Comunidad({showToast}){
+  return(
+    <div className="fade">
+      <div className="page-head"><div><h1 className="page-title">Precios de <em>referencia.</em></h1></div><div className="page-meta"><div className="now">87 COMERCIOS EN CASILDA</div><div>ÚLTIMOS 7 DÍAS</div></div></div>
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-label">Comercios en zona</div><div className="kpi-val">87</div><div className="kpi-delta up">▲ 12 nuevos</div></div>
+        <div className="kpi"><div className="kpi-label">Podés ahorrar</div><div className="kpi-val">$23K</div><div className="kpi-delta up">por mes</div></div>
+        <div className="kpi"><div className="kpi-label">Más caros que zona</div><div className="kpi-val" style={{color:'var(--red)'}}>{COMM_DATA.filter(p=>p.diff<0).length}</div></div>
+        <div className="kpi"><div className="kpi-label">Más baratos</div><div className="kpi-val" style={{color:'var(--green)'}}>{COMM_DATA.filter(p=>p.diff>0).length}</div></div>
+      </div>
+      <div className="card" style={{marginBottom:18}}>
+        <div className="tag navy">COMUNIDAD ANÓNIMA</div>
+        <div className="card-title">Cuánto pagás vs el barrio</div>
+        <div className="card-sub"><span style={{fontWeight:700,color:'var(--navy)'}}>■ azul</span> = promedio zona · <span style={{fontWeight:700,color:'var(--olive)'}}>■ verde</span> = vos</div>
+        {COMM_DATA.map((p,i)=>{
+          const mx=Math.max(p.yours,p.avg)*1.1;
+          const yp=(p.yours/mx)*80+10;
+          const ap=(p.avg/mx)*80+10;
+          return(
+            <div key={i} className="comm-row">
+              <div style={{flex:1}}><div style={{fontWeight:600,fontSize:14}}>{p.name}</div><div style={{fontSize:11,color:'var(--muted)',fontFamily:'JetBrains Mono,monospace'}}>Vos: ${p.yours.toLocaleString('es-AR')}</div></div>
+              <div className="comm-graph">
+                <div className="comm-line" style={{left:`${ap}%`,background:'var(--navy)'}}><span className="comm-avg-lbl">${p.avg.toLocaleString('es-AR')}</span></div>
+                <div className="comm-line" style={{left:`${yp}%`,background:'var(--olive)'}}><span className="comm-you-lbl" style={{color:'var(--olive)'}}>VOS</span></div>
+              </div>
+              <div style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:13,minWidth:60,textAlign:'right',color:p.diff>0?'var(--green)':'var(--red)'}}>{p.diff>0?'+':''}{p.diff}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="card">
+        <div className="card-title">Negociá con tu proveedor</div>
+        <div style={{background:'var(--bg)',padding:18,borderRadius:10,borderLeft:'4px solid var(--olive)',fontSize:14,lineHeight:1.6,marginBottom:16,fontStyle:'italic',color:'var(--ink)'}}>
+          "Otros 23 comercios en Casilda están comprando el <strong>Aceite Cocinero</strong> a $1.720. Vos pagás $1.880. <strong style={{color:'var(--olive)',fontStyle:'normal'}}>Ahorrarías $11.520 al mes</strong> si negociás."
+        </div>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+          <button className="btn" onClick={()=>showToast('📨 Mensaje enviado al proveedor.')}>Mandar mensaje al proveedor</button>
+          <button className="btn ghost" onClick={()=>showToast('Ver alternativas...')}>Ver alternativas</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Asistente({showToast}){
+  const [msgs,setMsgs]=useState([
+    {from:'bot',text:'Buen día Tito. Alertas del día:\n🥖 Pan lactal: 10u. Viernes vendés ~28. Pedir 30.\n☕ Café Bonafide: 4u. Stock crítico.\n🥤 Coca 2.25L: margen +38% → pedí más.',time:'5:08 AM'},
+    {from:'me',text:'Pedí 30 de pan, 12 de café y 40 de Coca',time:'5:14 AM'},
+    {from:'bot',text:'Listo. 3 pedidos generados:\n→ Bimbo: 30u (entrega 11hs)\n→ Bonafide: 12u (martes)\n→ FEMSA: 40u (mañana)\n\nPago USDC: $24.180. ¿Confirmo?',time:'5:14 AM'},
+  ]);
+  const [inp,setInp]=useState('');
+  const [rules,setRules]=useState([
+    {name:'Aviso stock crítico',desc:'CUANDO QUEDA <30% DEL ÓPTIMO',on:true},
+    {name:'Predicción semanal',desc:'VIERNES 5AM · ANTICIPA FINDE',on:true},
+    {name:'Alerta precio caído',desc:'COSTO PROVEEDOR ↑ >10%',on:true},
+    {name:'Reporte mensual',desc:'PRIMER DÍA DEL MES · 8AM',on:false},
+  ]);
+  const send=()=>{
+    if(!inp.trim())return;
+    setMsgs(m=>[...m,{from:'me',text:inp,time:'ahora'}]);
+    const r=inp.toLowerCase();
+    const reply=r.includes('sí')||r.includes('si')||r.includes('confirmo')?'✓ Escrow desplegado. Bloque #847.225. Te aviso cuando llegue.':r.includes('cancel')?'Pedido cancelado.':'Entendido. ¿Querés que te ayude con el inventario o hacer un pedido?';
+    setInp('');
+    setTimeout(()=>setMsgs(m=>[...m,{from:'bot',text:reply,time:'ahora'}]),800);
+  };
+  return(
+    <div className="fade">
+      <div className="page-head"><div><h1 className="page-title">Asistente <em>WhatsApp.</em></h1></div><div className="page-meta"><div className="now">WhatsApp Business API</div></div></div>
+      <div className="g2">
+        <div className="chat-card card">
+          <div className="chat-head"><div className="chat-avatar">VL</div><div><div style={{fontWeight:600,fontSize:14}}>Asistente VíaLibre</div><div style={{fontSize:11,color:'rgba(255,255,255,.7)'}}>● en línea</div></div></div>
+          <div className="chat-body">
+            {msgs.map((m,i)=><div key={i} className={`msg${m.from==='me'?' me':''}`}>{m.text}<span className="msg-time">{m.time}</span></div>)}
+            <div className="chat-actions">
+              <button className="chat-action-btn" style={{background:'var(--navy)',color:'#fff'}} onClick={()=>{setMsgs(m=>[...m,{from:'me',text:'Sí confirmo',time:'ahora'}]);setTimeout(()=>setMsgs(m=>[...m,{from:'bot',text:'✓ Escrow desplegado en Braga Chain.',time:'ahora'}]),800)}}>SÍ, PEDIR Y PAGAR</button>
+              <button className="chat-action-btn danger" onClick={()=>setMsgs(m=>[...m,{from:'me',text:'Cancelar',time:'ahora'},{from:'bot',text:'Pedido cancelado.',time:'ahora'}])}>CANCELAR</button>
+            </div>
+          </div>
+          <div className="chat-input">
+            <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()} placeholder="Escribí un mensaje..."/>
+            <button onClick={send}>➤</button>
+          </div>
+        </div>
+        <div className="card">
+          <div className="tag navy">REGLAS ACTIVAS</div>
+          <div className="card-title">Automatizaciones</div>
+          <div className="card-sub">El asistente actúa cuando se cumplen estas condiciones</div>
+          {rules.map((r,i)=>(
+            <div key={i} className="rule-item">
+              <div className={`sw${r.on?' on':''}`} onClick={()=>setRules(rs=>rs.map((x,j)=>j===i?{...x,on:!x.on}:x))}/>
+              <div><div style={{fontWeight:600,fontSize:14}}>{r.name}</div><div style={{fontSize:11,color:'var(--muted)',fontFamily:'JetBrains Mono,monospace',marginTop:3}}>{r.desc}</div></div>
+            </div>
+          ))}
+          <button className="btn" style={{width:'100%',marginTop:14}} onClick={()=>showToast('Nueva regla creada.')}>+ Nueva regla</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Capital({showToast}){
+  const [arkivData,setArkivData]=useState(null);
+  const [loading,setLoading]=useState(true);
+  useEffect(()=>{
+    fetch('/api/collateral?action=status')
+      .then(r=>r.json())
+      .then(d=>{setArkivData(d);setLoading(false);})
+      .catch(()=>{setArkivData({mock:true,blockNumber:'847.225',chainName:'Braga',address:'0x···',balance:'0.00'});setLoading(false);});
+  },[]);
+  const connected=arkivData?.ok&&!arkivData?.mock;
+  return(
+    <div className="fade">
+      <div className="page-head"><div><h1 className="page-title">Mi negocio <em>Web3.</em></h1></div><div className="page-meta"><div className="now">RWA · BRAGA CHAIN</div></div></div>
+      <div style={{padding:'10px 16px',borderRadius:10,marginBottom:20,background:loading?'var(--bg)':connected?'var(--green2)':'#fff8e1',border:`1px solid ${loading?'var(--border)':connected?'var(--green)':'var(--yellow)'}`,display:'flex',alignItems:'center',gap:10,fontSize:13}}>
+        <span style={{fontSize:18}}>{loading?'⏳':connected?'✅':'⚠️'}</span>
+        <span>{loading?'Conectando a Braga Chain...':connected?`Conectado · ${arkivData.chainName} · Bloque #${arkivData.blockNumber} · ${arkivData.address?.slice(0,8)}…`:'Modo demo — configurá PRIVATE_KEY en Vercel'}</span>
+        <button onClick={()=>{setLoading(true);fetch('/api/collateral?action=status').then(r=>r.json()).then(d=>{setArkivData(d);setLoading(false);}).catch(()=>{setArkivData({mock:true});setLoading(false);})}} style={{marginLeft:'auto',background:'none',border:'none',cursor:'pointer',color:'var(--muted)'}}>↻</button>
+      </div>
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-label">Inventario tokenizado</div><div className="kpi-val">$5.700 USD</div><div className="kpi-delta up">Aval DeFi</div></div>
+        <div className="kpi"><div className="kpi-label">Microcrédito disponible</div><div className="kpi-val">$3.420 USDC</div><div className="kpi-delta up">Disponible</div></div>
+        <div className="kpi"><div className="kpi-label">Balance wallet</div><div className="kpi-val">{arkivData?.balance||'···'}<span style={{fontSize:13,color:'var(--muted)'}}> GLM</span></div></div>
+        <div className="kpi"><div className="kpi-label">Data-to-Earn</div><div className="kpi-val">142 VLA</div><div className="kpi-delta up">▲ acumulados</div></div>
+      </div>
+      <div className="g2">
+        <div className="collateral-card">
+          <div className="col-inner">
+            <div className="col-label">CAPITAL ON-CHAIN · BRAGA CHAIN</div>
+            <div className="col-val">3.420<span className="col-unit">USDC</span></div>
+            <div className="col-desc">Tu stock físico verificado actúa como colateral. Sin banco. Sin papeles.</div>
+            <div className="col-bars">
+              {[40,60,70,80,65,90,75].map((h,i)=><div key={i} className="col-bar" style={{height:`${h}%`,background:i===5?'var(--olive3)':'rgba(255,255,255,.25)'}}/>)}
+            </div>
+            <div className="col-stats">
+              <div className="col-stat"><div className="l">Valor stock</div><div className="v">$5.700 USD</div></div>
+              <div className="col-stat"><div className="l">LTV</div><div className="v">60%</div></div>
+              <div className="col-stat"><div className="l">Tasa anual</div><div className="v">4,2%</div></div>
+              <div className="col-stat"><div className="l">Bloque</div><div className="v">#{arkivData?.blockNumber||'···'}</div></div>
+            </div>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+              <button className="btn olive" onClick={()=>showToast('Solicitud enviada al pool DeFi.')}>SOLICITAR CRÉDITO →</button>
+              <button style={{background:'rgba(255,255,255,.12)',color:'#fff',border:'none',padding:'12px 18px',borderRadius:10,fontWeight:700,fontSize:13,cursor:'pointer'}} onClick={()=>showToast('📦 Stock registrado en Braga Chain.')}>📦 REGISTRAR STOCK</button>
+            </div>
+          </div>
+        </div>
+        <div className="card">
+          <div className="tag" style={{background:'var(--olive)',color:'#fff'}}>DATA-TO-EARN</div>
+          <div className="card-title">Recompensas</div>
+          <div className="card-sub">Tus datos de mercado le valen a las marcas</div>
+          {[{b:'Nestlé Argentina',a:38},{b:'FEMSA Coca-Cola',a:52},{b:'Mondelēz',a:24},{b:'Unilever',a:28}].map((e,i)=>(
+            <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border2)',fontSize:13}}>
+              <span style={{color:'var(--muted)'}}>{e.b}</span>
+              <span style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,color:'var(--olive)'}}>+{e.a} VLA</span>
+            </div>
+          ))}
+          <button className="btn olive" style={{width:'100%',marginTop:14}} onClick={()=>showToast('VLA → USDC convertidos.')}>Convertir VLA → USDC</button>
+        </div>
+      </div>
+      <div className="g2" style={{marginTop:18}}>
+        <div className="card">
+          <div className="tag navy">ESCROW PROGRAMABLE</div>
+          <div className="card-title">Pedido a Bimbo</div>
+          <div className="card-sub">$24.180 · Contrato 0x84f…2c9b</div>
+          {[
+            {l:'Pedido autorizado por WhatsApp',s:'05:15 AM · CONTRATO DESPLEGADO',a:'$24.180',cls:'done'},
+            {l:'Fondos bloqueados en escrow',s:'05:15 AM · USDC LOCKED',a:'$24.180',cls:'done'},
+            {l:'Esperando entrega física',s:'ETA 11:00 AM · ESCANEAR REMITO',a:'—',cls:'act'},
+            {l:'Liberación automática al proveedor',s:'AL CONFIRMAR REMITO',a:'$24.180',cls:''},
+          ].map((step,i)=>(
+            <div key={i} className={`esc-step${step.cls?' '+step.cls:''}`}>
+              <div className="esc-dot">{step.cls==='done'?'✓':i+1}</div>
+              <div><div className="esc-l">{step.l}</div><div className="esc-s">{step.s}</div></div>
+              <div className="esc-amt">{step.a}</div>
+            </div>
+          ))}
+        </div>
+        <div className="card">
+          <div className="tag navy">HISTORIAL ON-CHAIN</div>
+          <div className="card-title">Transacciones</div>
+          {TX_DATA.map((tx,i)=>(
+            <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--border2)',gap:8}}>
+              <div style={{flex:1}}><div style={{fontWeight:600,fontSize:14}}>{tx.type}</div><div style={{fontSize:10,color:'var(--muted)',fontFamily:'JetBrains Mono,monospace',marginTop:2}}>{tx.hash} · {tx.date}</div></div>
+              <div style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,fontSize:13,color:tx.amt>0?'var(--green)':'var(--red)',whiteSpace:'nowrap'}}>{tx.amt>0?'+':''}{tx.amt} {tx.unit}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Score({showToast}){
+  const [anim,setAnim]=useState(false);
+  useEffect(()=>{const t=setTimeout(()=>setAnim(true),400);return()=>clearTimeout(t)},[]);
+  const score=782,max=900,circ=2*Math.PI*88;
+  const offset=circ-(score/max)*circ;
+  const offers=[
+    {name:'Goldfinch Protocol',amt:'$8.000 USDC',rate:'6,8%',tag:'PRE-APROBADO',c:'var(--green)'},
+    {name:'Aave Argentina Pool',amt:'$5.500 USDC',rate:'4,2%',tag:'REVISIÓN AUTO',c:'var(--yellow)'},
+    {name:'Banco Galicia Móvil',amt:'$1.200.000 ARS',rate:'78%',tag:'TRADICIONAL',c:'var(--red)'},
+  ];
+  return(
+    <div className="fade">
+      <div className="page-head"><div><h1 className="page-title">Score <em>on-chain.</em></h1></div><div className="page-meta"><div className="now">REPUTACIÓN WEB3</div><div>SIN BANCO</div></div></div>
+      <div className="g2">
+        <div className="card" style={{padding:0,overflow:'hidden'}}>
+          <div style={{padding:'22px 22px 0'}}><div className="card-title">Tu reputación crediticia</div><div className="card-sub">Generada por tu operación diaria</div></div>
+          <div className="score-ring-wrap">
+            <div className="score-ring">
+              <svg viewBox="0 0 200 200"><circle fill="none" stroke="var(--border)" strokeWidth="12" cx="100" cy="100" r="88"/><circle fill="none" stroke="var(--olive)" strokeWidth="12" strokeLinecap="round" cx="100" cy="100" r="88" strokeDasharray={circ} strokeDashoffset={anim?offset:circ} style={{transition:'stroke-dashoffset 1.6s ease'}}/></svg>
+              <div className="score-num">{anim?score:0}<small>/{max}</small></div>
+            </div>
+          </div>
+          <div style={{textAlign:'center',fontFamily:'JetBrains Mono,monospace',fontSize:11,letterSpacing:'.14em',color:'var(--green)',fontWeight:700,marginBottom:16}}>RANGO A · APTO PARA FINANCIAMIENTO GLOBAL</div>
+          <div style={{padding:'0 22px 22px'}}>
+            {[{l:'Consistencia operativa (90 días)',v:'98%',c:'var(--green)'},{l:'Volumen verificado de ventas',v:'A+',c:'var(--green)'},{l:'Márgenes positivos sostenidos',v:'A',c:'var(--green)'},{l:'Frecuencia actualización stock',v:'B+',c:'var(--yellow)'},{l:'Antigüedad on-chain',v:'11 meses',c:'var(--olive)'}].map((f,i)=>(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border2)',fontSize:13}}>
+                <span>{f.l}</span><span style={{fontFamily:'JetBrains Mono,monospace',fontWeight:700,color:f.c}}>{f.v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="card">
+          <div className="tag navy">OFERTAS PARA VOS</div>
+          <div className="card-title">Financiamiento disponible</div>
+          <div className="card-sub">Sin papeles, sin contador</div>
+          {offers.map((o,i)=>(
+            <div key={i} style={{background:'var(--bg)',padding:16,marginBottom:10,borderRadius:10,borderLeft:`4px solid ${o.c}`}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                <strong style={{fontSize:16}}>{o.name}</strong>
+                <span style={{fontFamily:'JetBrains Mono,monospace',fontSize:10,padding:'3px 8px',background:o.c,color:o.c==='var(--yellow)'?'var(--ink)':'#fff',borderRadius:4,fontWeight:700}}>{o.tag}</span>
+              </div>
+              <div style={{fontSize:13,color:'var(--muted)',marginBottom:10}}>Hasta <strong>{o.amt}</strong> · Tasa {o.rate} anual</div>
+              <button className={`btn${o.c==='var(--green)':'ghost'}`} style={{padding:'9px 16px',fontSize:13,borderRadius:8,background:o.c==='var(--green)'?'var(--navy)':'transparent',color:o.c==='var(--green)'?'#fff':'var(--ink)',border:o.c!=='var(--green)'?'1px solid var(--border)':'none'}} onClick={()=>showToast(`Solicitud enviada a ${o.name}`)}>
+                {o.c==='var(--green)'?'Solicitar':'Ver términos'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============ APP ============
+function App(){
+  const [page,setPage]=useState('panel');
+  const [inv,setInv]=useState(INVENTORY);
+  const [toast,setToast]=useState(null);
+  const [scanner,setScanner]=useState(false);
+  const toastTimer=useRef(null);
+
+  const showToast=useCallback((msg)=>{
+    setToast(msg);
+    clearTimeout(toastTimer.current);
+    toastTimer.current=setTimeout(()=>setToast(null),3200);
+  },[]);
+
+  const openScanner=()=>setScanner(true);
+
+  const onScanConfirm=(lines)=>{
+    setInv(prev=>{
+      const next=[...prev];
+      lines.forEach(l=>{const i=next.findIndex(p=>p.name.includes(l.name.split(' ')[0]));if(i>=0)next[i]={...next[i],stock:next[i].stock+l.qty};});
+      return next;
+    });
+    setScanner(false);
+    showToast(`✅ ${lines.length} productos cargados al inventario`);
+  };
+
+  const nav=[
+    {id:'panel',icon:'🏠',label:'Panel'},
+    {id:'inventario',icon:'📦',label:'Inventario'},
+    {id:'escaner',icon:'📷',label:'Escáner'},
+    {id:'voz',icon:'🎤',label:'Voz'},
+    {id:'semaforo',icon:'🚦',label:'Semáforo'},
+    {id:'comunidad',icon:'👥',label:'Comunidad'},
+    {id:'asistente',icon:'💬',label:'Asistente'},
+    {id:'capital',icon:'⛓️',label:'Capital Web3'},
+    {id:'score',icon:'📊',label:'Score'},
+  ];
+
+  const pages={
+    panel:<Dashboard inv={inv} setInv={setInv} showToast={showToast} openScanner={openScanner}/>,
+    inventario:<Inventario inv={inv} setInv={setInv} showToast={showToast}/>,
+    escaner:<div className="fade"><div className="page-head"><div><h1 className="page-title">Escáner <em>inteligente.</em></h1></div></div><div className="g2"><div className="scanner-card"><div className="scan-eye">📄<div className="scan-line"/></div><div className="scan-title">Una foto. Todo el ticket cargado.</div><div className="scan-desc">Funciona con tickets impresos, fotos de WhatsApp y PDFs. Detecta productos, cantidades, precios, IVA y descuentos.</div><button className="btn-scan" onClick={openScanner}>📷 Escanear factura</button></div><div className="card"><div className="tag navy">HISTORIAL</div><div className="card-title">Últimas facturas</div>{[{p:'Distribuidora Rosario',n:23,t:48220,d:'HOY'},{p:'Lácteos del Litoral',n:11,t:22110,d:'AYER'},{p:'Bimbo Argentina',n:8,t:15640,d:'26/05'},{p:'Coca-Cola FEMSA',n:7,t:18940,d:'25/05'}].map((f,i)=><div key={i} className="sem-item"><span className="dot g"/><div><div className="pname">{f.p}</div><div className="pmeta">{f.n} PRODUCTOS · ${f.t.toLocaleString('es-AR')}</div></div><div className="mpct" style={{color:'var(--muted)',fontSize:11}}>{f.d}</div></div>)}<button className="btn" style={{width:'100%',marginTop:14}} onClick={openScanner}>+ Nueva factura</button></div></div></div>,
+    voz:<div className="fade"><div className="page-head"><div><h1 className="page-title">Voz e <em>imagen.</em></h1></div></div><div className="g2"><div className="card voice-card"><div className="tag" style={{background:'var(--red)',color:'#fff'}}>FUNCIÓN 02</div><div className="card-title">Hablale al teléfono.</div><p style={{fontSize:13,color:'var(--muted)',marginBottom:18}}>Caminá por los estantes nombrando lo que tenés. La IA entiende cantidades y productos.</p><div className="mic-btn" style={{width:100,height:100,fontSize:38}} onClick={()=>showToast('🎤 "Me quedan 5 latas de atún, 3 kilos de arroz..." → ✅ Inventario actualizado')}>🎤</div><p style={{textAlign:'center',fontSize:13,color:'var(--muted)',marginBottom:12}}>Tocá para grabar</p><div className="wave">{Array.from({length:9}).map((_,i)=><div key={i} className="wbar anim" style={{height:`${[20,40,80,60,100,60,80,40,20][i]}%`,animationDelay:`${i*0.1}s`}}/>)}</div><div className="transcript">Esperando voz...</div></div><div className="card"><div className="card-title">Ejemplo real</div><div className="card-sub">Transcripción → Inventario</div><div style={{background:'var(--bg)',padding:14,borderRadius:10,fontFamily:'JetBrains Mono,monospace',fontSize:12,lineHeight:1.7,borderLeft:'3px solid var(--olive)',marginBottom:14}}>"Me quedan cinco latas de atún Gomes, tres kilos de arroz Gallo y dos paquetes de servilletas Elite"</div>{[{n:'Atún Gomes 170g',prev:12,next:5},{n:'Arroz Gallo 1kg',prev:8,next:3},{n:'Servilletas Elite',prev:5,next:2}].map((it,i)=><div key={i} className="sem-item"><span className="dot g"/><div><div className="pname">{it.n}</div><div className="pmeta">STOCK: {it.prev} → {it.next}</div></div><div className="mpct" style={{color:'var(--red)'}}>-{it.prev-it.next}</div></div>)}</div></div></div>,
+    semaforo:<Semaforo inv={inv} showToast={showToast}/>,
+    comunidad:<Comunidad showToast={showToast}/>,
+    asistente:<Asistente showToast={showToast}/>,
+    capital:<Capital showToast={showToast}/>,
+    score:<Score showToast={showToast}/>,
+  };
+
+  return(
+    <div style={{display:'flex',flexDirection:'column',minHeight:'100vh'}}>
+      <header className="topbar">
+        <div className="brand">
+          <div className="brand-mark">V</div>
+          <div className="brand-name">Vía<span>Libre</span></div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:10,background:'rgba(255,255,255,.1)',padding:'7px 14px',borderRadius:10,fontSize:13,fontWeight:500}}>
+          <span className="shop-dot"/>Almacén Don Tito · Casilda
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <button style={{width:36,height:36,background:'rgba(255,255,255,.1)',border:'none',color:'#fff',borderRadius:10,fontSize:16,cursor:'pointer'}} onClick={()=>showToast('3 alertas pendientes')}>🔔</button>
+          <button style={{width:36,height:36,background:'rgba(255,255,255,.1)',border:'none',color:'#fff',borderRadius:10,fontSize:16,cursor:'pointer'}} onClick={()=>showToast('Cuenta: Don Tito')}>👤</button>
+        </div>
+      </header>
+
+      <div className="layout">
+        <aside className="sidebar">
+          {nav.map(n=>(
+            <button key={n.id} className={`nav-btn${page===n.id?' active':''}`} onClick={()=>setPage(n.id)}>
+              <span className="nav-icon">{n.icon}</span>{n.label}
+            </button>
+          ))}
+          <div className="nav-foot">v2.6.0 · ESTABLE<br/>Bloque #847.225<br/>Casilda · AR · UTC-3</div>
+        </aside>
+        <main className="main">{pages[page]||pages.panel}</main>
+      </div>
+
+      <div className="ticker">
+        <div className="ticker-track">
+          <em>USDC/ARS</em><span>1.247,80 ▲</span><em>VLA TOKEN</em><span>$0,148 ▲ 2,4%</span><em>BASE GAS</em><span>0,0001 USDC</span><em>COMERCIOS</em><span>4.812 ▲</span><em>BLOQUE</em><span>#847.225</span>
+          <em>USDC/ARS</em><span>1.247,80 ▲</span><em>VLA TOKEN</em><span>$0,148 ▲ 2,4%</span><em>BASE GAS</em><span>0,0001 USDC</span><em>COMERCIOS</em><span>4.812 ▲</span><em>BLOQUE</em><span>#847.225</span>
+        </div>
+      </div>
+
+      {scanner&&<ScannerModal onClose={()=>setScanner(false)} onConfirm={onScanConfirm}/>}
+      <Toast msg={toast}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
 </html>
