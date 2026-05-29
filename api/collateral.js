@@ -1,33 +1,38 @@
-// api/collateral.js — Vercel Serverless Function
-// La PRIVATE_KEY vive SOLO acá, nunca en el browser
 import { createPublicClient, createWalletClient, http, formatEther } from '@arkiv-network/sdk';
 import { privateKeyToAccount } from '@arkiv-network/sdk/accounts';
 import { braga } from '@arkiv-network/sdk/chains';
 
 export default async function handler(req, res) {
-  // CORS para el frontend de Vercel
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const PRIVATE_KEY = process.env.PRIVATE_KEY;
+  let PRIVATE_KEY = process.env.PRIVATE_KEY;
   if (!PRIVATE_KEY) {
-    return res.status(500).json({ error: 'PRIVATE_KEY no configurada en variables de entorno' });
+    return res.status(500).json({ error: 'PRIVATE_KEY no configurada en Vercel' });
+  }
+
+  // Normalizar: agregar 0x si falta
+  if (!PRIVATE_KEY.startsWith('0x')) {
+    PRIVATE_KEY = '0x' + PRIVATE_KEY;
+  }
+  // Validar longitud (debe ser 32 bytes = 64 chars hex + '0x')
+  if (PRIVATE_KEY.length !== 66) {
+    return res.status(500).json({
+      error: `PRIVATE_KEY inválida: longitud ${PRIVATE_KEY.length}, esperada 66 (0x + 64 hex chars)`
+    });
   }
 
   try {
-    // Cliente de solo lectura (no necesita clave)
     const publicClient = createPublicClient({
       chain: braga,
       transport: http(),
     });
 
-    // Cuenta del comerciante desde la clave privada
     const account = privateKeyToAccount(PRIVATE_KEY);
     const address = account.address;
 
-    // Cliente con firma (para transacciones)
     const walletClient = createWalletClient({
       chain: braga,
       transport: http(),
@@ -36,7 +41,6 @@ export default async function handler(req, res) {
 
     const { action } = req.query;
 
-    // === GET /api/collateral?action=status ===
     if (!action || action === 'status') {
       const [balance, blockNumber, chainId] = await Promise.all([
         publicClient.getBalance({ address }),
@@ -54,22 +58,18 @@ export default async function handler(req, res) {
         chainName: braga.name,
         network: braga.network,
         explorer: braga.blockExplorers.default.url,
+        rpc: braga.rpcUrls.default.http[0],
       });
     }
 
-    // === POST /api/collateral?action=registerStock ===
-    // Registra el valor del inventario on-chain como colateral
     if (action === 'registerStock' && req.method === 'POST') {
       const { stockValue, skuCount } = req.body || {};
-      
-      // Preparar el hash del inventario como data en una transacción simbólica
-      // (en producción esto llamaría a un contrato inteligente)
       const dataHex = `0x${Buffer.from(
-        JSON.stringify({ stockValue, skuCount, timestamp: Date.now() })
+        JSON.stringify({ stockValue, skuCount, timestamp: Date.now(), app: 'vialibre' })
       ).toString('hex')}`;
 
       const hash = await walletClient.sendTransaction({
-        to: address, // self-transaction para registrar datos
+        to: address,
         value: 0n,
         data: dataHex,
       });
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
     console.error('[arkiv api error]', err.message);
     return res.status(500).json({
       error: err.message,
-      hint: 'Verificar PRIVATE_KEY en Vercel Environment Variables'
+      hint: 'Verificar formato de PRIVATE_KEY en Vercel (con o sin 0x, 64 chars hex)'
     });
   }
 }
