@@ -132,10 +132,11 @@ export default async function handler(req, res) {
           { key: 'category', value: String(p.category) },
           { key: 'status', value: String(p.status) },
           // Atributos numéricos (permiten range queries: gt, lt, gte, lte)
-          { key: 'cost', value: Number(p.cost) },
-          { key: 'pvp', value: Number(p.pvp) },
-          { key: 'stock', value: Number(p.stock) },
-          { key: 'margin', value: Number(p.margin) },
+          // El SDK convierte a BigInt: se usan enteros (margin * 10 para preservar 1 decimal)
+          { key: 'cost', value: Math.round(Number(p.cost)) },
+          { key: 'pvp', value: Math.round(Number(p.pvp)) },
+          { key: 'stock', value: Math.round(Number(p.stock)) },
+          { key: 'margin', value: Math.round(Number(p.margin) * 10) },
           { key: 'updatedAt', value: Date.now() },
         ],
         expiresIn: ExpirationTime.fromDays(30), // catálogo de productos: 30 días
@@ -167,7 +168,7 @@ export default async function handler(req, res) {
           { key: 'productId', value: String(pid) },
           { key: 'reason', value: String(reason || 'manual') },
           // Numérico para permitir queries de rango (ej: delta > 0 = entrada de stock)
-          { key: 'delta', value: Number(delta || 0) },
+          { key: 'delta', value: Math.round(Number(delta || 0)) },
           { key: 'timestamp', value: Date.now() },
         ],
         expiresIn: ExpirationTime.fromDays(7), // movimientos: 7 días de historial
