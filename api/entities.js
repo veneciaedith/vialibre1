@@ -124,7 +124,7 @@ export default async function handler(req, res) {
         attributes: [
           { key: PROJECT_ATTR.key, value: PROJECT_ATTR.value }, // namespace del proyecto
           { key: 'type', value: 'product' },
-          { key: '$owner', value: account.address },           // control mutable de escritura
+          // $owner y $creator son sintéticos — los asigna el SDK automáticamente desde la wallet firmante
           // Atributos string (igualdad y glob)
           { key: 'productId', value: String(p.id) },
           { key: 'sku', value: String(p.sku) },
@@ -164,7 +164,6 @@ export default async function handler(req, res) {
         attributes: [
           { key: PROJECT_ATTR.key, value: PROJECT_ATTR.value },
           { key: 'type', value: 'movement' },
-          { key: '$owner', value: account.address },
           // FK: mismo valor que productId en la entidad product
           { key: 'productId', value: String(pid) },
           { key: 'reason', value: String(reason || 'manual') },
