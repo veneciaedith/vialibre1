@@ -3,7 +3,7 @@ import { PageHeader, Kpi } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { useArkiv } from '../hooks/useArkiv';
 import { onChainTxs, tokenEarnings } from '../data/inventory';
-import { ArrowRight, ExternalLink, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { ArrowRight, ExternalLink, RefreshCw, Wifi, WifiOff, Database } from 'lucide-react';
 
 // Indicador de conexión on-chain
 function ChainStatus({ status, loading, error, onRefresh }) {
@@ -44,7 +44,7 @@ function ChainStatus({ status, loading, error, onRefresh }) {
 
 export default function Capital() {
   const { showToast, inventory } = useApp();
-  const { status, loading, error, lastTx, fetchStatus, registerStock } = useArkiv();
+  const { status, loading, error, lastTx, syncing, fetchStatus, registerStock, syncProducts } = useArkiv();
   const [registering, setRegistering] = useState(false);
 
   const totalCollateral = Math.round(inventory.reduce((s, p) => s + p.cost * p.stock, 0) / 1250);
@@ -52,13 +52,13 @@ export default function Capital() {
 
   const handleRegisterStock = async () => {
     setRegistering(true);
-    const stockValueUSD = totalCollateral * 1.65;
-    const result = await registerStock(Math.round(stockValueUSD), inventory.length);
+    // Sincroniza todo el inventario como entidades Arkiv (batch de entidades "product")
+    const result = await syncProducts(inventory);
     setRegistering(false);
-    if (result) {
-      showToast(`✅ Stock registrado on-chain · TX: ${result.hash?.slice(0, 10)}…`);
+    if (result?.ok) {
+      showToast(`✅ ${result.synced} productos sincronizados on-chain · TX: ${result.txHash?.slice(0, 10)}…`);
     } else {
-      showToast('⚠️ Error al registrar. Verificá PRIVATE_KEY en Vercel.');
+      showToast('⚠️ Error al sincronizar. Verificá PRIVATE_KEY en Vercel.');
     }
   };
 
@@ -111,27 +111,35 @@ export default function Capital() {
               </button>
               <button
                 className="col-cta"
-                style={{ background: registering ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.12)' }}
+                style={{ background: (registering || syncing) ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.12)' }}
                 onClick={handleRegisterStock}
-                disabled={registering}
+                disabled={registering || syncing}
               >
-                {registering ? (
-                  <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Registrando…</>
+                {(registering || syncing) ? (
+                  <><RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} /> Sincronizando entidades…</>
                 ) : (
-                  '📦 REGISTRAR STOCK ON-CHAIN'
+                  <><Database size={14} /> SINCRONIZAR {inventory.length} SKU ON-CHAIN</>
                 )}
               </button>
             </div>
 
-            {/* Última TX */}
+            {/* Última operación on-chain */}
             {lastTx && (
               <div style={{ marginTop: 16, padding: 12, background: 'rgba(255,255,255,.06)', borderRadius: 10, fontSize: 12, fontFamily: 'JetBrains Mono,monospace' }}>
-                <div style={{ color: 'var(--olive-soft)', marginBottom: 4 }}>✓ ÚLTIMA TRANSACCIÓN</div>
-                <div style={{ opacity: .8 }}>{lastTx.hash?.slice(0, 20)}…</div>
+                <div style={{ color: 'var(--olive-soft)', marginBottom: 4 }}>
+                  ✓ {lastTx.action === 'syncProducts' ? `${lastTx.synced} ENTIDADES ARKIV CREADAS` : 'ÚLTIMA TRANSACCIÓN'}
+                </div>
+                <div style={{ opacity: .8 }}>TX: {(lastTx.txHash || lastTx.hash)?.slice(0, 20)}…</div>
                 {lastTx.explorerUrl && (
                   <a href={lastTx.explorerUrl} target="_blank" rel="noreferrer"
                     style={{ color: 'var(--olive-soft)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
                     Ver en explorer <ExternalLink size={12} />
+                  </a>
+                )}
+                {lastTx.action === 'syncProducts' && status?.explorer && lastTx.txHash && (
+                  <a href={`${status.explorer}/tx/${lastTx.txHash}`} target="_blank" rel="noreferrer"
+                    style={{ color: 'var(--olive-soft)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
+                    Ver en Braga Explorer <ExternalLink size={12} />
                   </a>
                 )}
               </div>
