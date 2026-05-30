@@ -136,7 +136,8 @@ export default async function handler(req, res) {
           { key: 'cost', value: Math.round(Number(p.cost)) },
           { key: 'pvp', value: Math.round(Number(p.pvp)) },
           { key: 'stock', value: Math.round(Number(p.stock)) },
-          { key: 'margin', value: Math.round(Number(p.margin) * 10) },
+          // margin almacenado con offset +1000 para soportar negativos (ej: -1.4% → 986, 40% → 1400)
+          { key: 'margin', value: Math.round(Number(p.margin) * 10) + 1000 },
           { key: 'updatedAt', value: Date.now() },
         ],
         expiresIn: ExpirationTime.fromDays(30), // catálogo de productos: 30 días
